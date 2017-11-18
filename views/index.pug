@@ -1,0 +1,13 @@
+extends layout.pug
+ 
+block body
+
+  #game
+    include game.pug
+    include login.pug
+
+  include scripts.pug
+  script(src='/database.js')
+  script(src='/auth.js')
+  script(src='/game.js')
+  script(src='/client.js')
