@@ -7,11 +7,10 @@ bodyParser        = require 'body-parser'
 stylish           = require 'stylish'
 autoprefixer      = require 'autoprefixer-stylus'
 axios             = require 'axios'
+moviedb           = require('./moviedb')
 
-genre_query = "https://api.themoviedb.org/3/genre/movie/list?api_key=6d796021f3e075d0f41eab481ccecd7f&language=en-US"
-
-axios.get(genre_query).then (response) ->
-  app.set 'genres', response.data.genres
+moviedb.genres().then (genres) -> 
+  app.set 'genres', genres
 
 app.use(express.static('assets'))
 

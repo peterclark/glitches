@@ -1,9 +1,4 @@
 $ ->
-  # users = []
-  # firestore.collection('users').onSnapshot (docs) ->
-  #   users.length = 0
-  #   docs.forEach (doc) ->
-  #     users.push doc.data()
       
   firebase.auth().onAuthStateChanged (user) ->
     if user
@@ -17,10 +12,14 @@ $ ->
       console.log "No user logged in."
       
   loggingIn = localStorage.getItem 'userIsLoggingIn'
-  
   if loggingIn == 'yes'
     $('.fa-github').addClass('hidden-xs-up')
     $('.fa-spinner').removeClass('hidden-xs-up')
   else
     $('.fa-github').removeClass('hidden-xs-up')
     $('.fa-spinner').addClass('hidden-xs-up')
+    
+  $(document).on 'click', '.create.game', (e) ->
+    genre = $(e.target).text()
+    database.addGame game.data.user, genre
+    console.log "Creating #{genre} game"

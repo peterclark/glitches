@@ -4,6 +4,7 @@ class window.Game
   
     @data = {
       genres: []
+      games: []
       user: undefined
       authenticated: false
     }
@@ -16,6 +17,10 @@ class window.Game
     @vue =   
       new Vue
         el: '#game'
-        data: @data 
+        data: @data
+        computed:
+          playing: ->
+            false
+              
         
 window.game = new Game
