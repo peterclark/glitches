@@ -2,13 +2,10 @@ extends layout.pug
  
 block body
 
-  #game
+  #game(v-cloak)
     include gameroom.pug
     include games.pug
     include login.pug
 
   include scripts.pug
-  script(src='/database.js')
-  script(src='/auth.js')
-  script(src='/game.js')
-  script(src='/client.js')
+  script(src='/app.js')

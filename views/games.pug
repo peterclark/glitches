@@ -1,7 +1,7 @@
 main.game(v-else-if="authenticated")
   nav.navigation
     a.btn.btn-link(href='/genres') Genres
-    button.btn.btn-link.logout-btn
+    button.btn.btn-link.signout-btn(v-on:click='signOut')
       img.rounded(:src="user.photoURL")
       i.fa.fa-fw.fa-sign-out
       | {{ user.displayName }}
