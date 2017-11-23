@@ -8,7 +8,6 @@ $ ->
       genres: []
       games: []
       user: undefined
-      authenticated: false
       isSigningIn: localStorage.getItem('isSigningIn')
 
     created: ->
@@ -16,10 +15,12 @@ $ ->
       @watchAuth()
 
     computed:
+      authenticated: ->
+        @user
       playing: ->
         false
-      disableSignIn: ->
-        if @isSigningIn=='yes' then true else false
+      signingIn: ->
+        @isSigningIn=='yes'
         
     watch:
       isSigningIn: (yesOrNo) ->
@@ -93,15 +94,13 @@ $ ->
           photoURL: user.photoURL
           lastLoginAt: new Date()
         .then =>
-          console.log "#{user.displayName} written to users database."
           @user = user
-          @authenticated = true
           console.log "#{user.displayName} is logged in."
         .catch (error) =>
           console.error "Error writing document: #{error}"
 
       removeUser: ->
-        @authenticated = false
+        @user = undefined
         @isSigningIn = 'no'
         console.log "No user logged in."
 
