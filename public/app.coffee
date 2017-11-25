@@ -1,3 +1,4 @@
+
 $ ->
   
   new Vue
@@ -8,6 +9,8 @@ $ ->
       genres: []
       games: []
       user: undefined
+      game: undefined
+      players: []
       isSigningIn: localStorage.getItem('isSigningIn')
 
     created: ->
@@ -18,9 +21,11 @@ $ ->
       authenticated: ->
         @user
       playing: ->
-        false
+        @user && @user.gameId?
       signingIn: ->
-        @isSigningIn=='yes'
+        @isSigningIn == 'yes'
+      canStartGame: ->
+        @game and @game.hostId == @user.uid && @game.status == 'open'
         
     watch:
       isSigningIn: (yesOrNo) ->
@@ -46,7 +51,7 @@ $ ->
       watchAuth: ->
         firebase.auth().onAuthStateChanged (user) =>
           if user
-            @addUser( user )
+            @createUser( user )
             @watchGames()
             @getGenres()
           else
@@ -57,18 +62,15 @@ $ ->
         @firestore().collection('games').onSnapshot (docs) =>
           @games.length = 0
           docs.forEach (doc) =>
-            @games.push doc.data()
+            data = doc.data() 
+            data['id'] = doc.id
+            @games.push data
         , (error) ->
           console.log 'stopped listening to games'
-
-        # @firestore().collection('games').onSnapshot (snapshot) ->
-        #   snapshot.docChanges.forEach (change) ->
-        #     if change.type == 'added'
-        #       @games.push change.doc.data()
-        #     else if change.type == 'modified'
-        #       console.log 'modified'
-        #     else if change.type == 'removed'
-        #       doc = change.doc.data()
+          
+      # Stop watching changes to all games
+      ignoreGames: ->
+        @firestore().collection('games').onSnapshot () -> {}
 
       # Sign in a user with Github
       signIn: (event) ->
@@ -87,17 +89,33 @@ $ ->
           response.data.forEach (genre) =>
             @genres.push genre
 
-      addUser: (user) ->
+      createUser: (user) ->
         @firestore().collection("users").doc(user.uid).set
-          displayName: user.displayName,
-          email: user.email,
+          uid: user.uid
+          displayName: user.displayName
+          email: user.email
           photoURL: user.photoURL
-          lastLoginAt: new Date()
+          lastLoginAt: new Date(),
+          { merge: true }
         .then =>
-          @user = user
           console.log "#{user.displayName} is logged in."
+          @watchUser(user.uid)
         .catch (error) =>
           console.error "Error writing document: #{error}"
+
+      # Watch changes to this user
+      watchUser: (uid) ->
+        @firestore().collection('users').doc(uid).onSnapshot (doc) =>
+          if doc.exists
+            console.log 'user modified'
+            @user = doc.data()
+            console.log "gameId is #{@user.gameId}"
+            @watchGame(@user.gameId) if @user.gameId?
+          else
+            @removeUser()
+          console.table [@user]
+        , (error) ->
+          console.log "stopped listening to user"
 
       removeUser: ->
         @user = undefined
@@ -107,10 +125,53 @@ $ ->
       createGame: (event) ->
         genre = $(event.target).text()
         @firestore().collection('games').add
-          host: @user.uid
+          hostId: @user.uid
           photoURL: @user.photoURL
           genre: genre
+          status: 'open'
         .then (game) =>
+          console.log game
+          @ignoreGames()
+          @watchGame( game.id )
           @firestore().collection('users').doc(@user.uid).set
-            game_id: game.id, { merge: true }
+            gameId: game.id, { merge: true }
         console.log "Creating #{genre} game"
+        
+      joinGame: (event) ->
+        gameId = $(event.target).data('game-id')
+        @firestore().collection('users').doc(@user.uid).set
+          gameId: gameId,
+          { merge: true}
+        .then =>
+          @ignoreGames()
+          @watchGame( gameId )
+        .catch (error) =>
+          console.log 'error joining game'
+          
+      watchGame: (gameId) ->
+        # Watch changes to this game.
+        @firestore().collection('games').doc(gameId).onSnapshot (doc) =>
+          @game = doc.data() if doc.exists
+          console.log "watching game #{@game.genre}"
+        , (error) ->
+          console.log "stopped listening to game"
+          
+        # Watch players in this Game
+        @firestore().collection('users').where("gameId", "==", gameId).onSnapshot (docs) =>
+          @players.length = 0
+          console.log 'players changed'
+          docs.forEach (doc) =>
+            @players.push doc.data()
+        , (error) ->
+          console.log 'stopped listening to players'
+        
+      # remove this game and start watching all games again.
+      deleteGame: (event) ->
+        gameId = @user.gameId
+        @firestore().collection('games').doc( gameId ).delete().then =>
+          @firestore().collection('users').doc(@user.uid).set
+            gameId: null, { merge: true }
+          console.log "Game #{gameId} deleted by #{@user.displayName}."
+          @watchGames()
+        .catch (error) =>
+          console.log error

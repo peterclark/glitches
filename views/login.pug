@@ -1,4 +1,4 @@
 main.signin(v-else)
-  button.btn.btn-primary.signin-btn(v-on:click="signIn" v-bind:disabled="signingIn")
+  button.btn.btn-github.signin-btn(v-on:click="signIn" v-bind:disabled="signingIn")
     i.fa.fa-fw.fa-4x.fa-github(v-bind:class="{ 'hidden-xs-up': signingIn }")
     i.fa.fa-fw.fa-4x.fa-spinner.fa-pulse(v-bind:class="{ 'hidden-xs-up': !signingIn }")
