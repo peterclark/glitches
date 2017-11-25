@@ -51,6 +51,7 @@ $ ->
       watchAuth: ->
         firebase.auth().onAuthStateChanged (user) =>
           if user
+            @watchGames()
             @createUser( user )
             @getGenres()
           else
@@ -144,6 +145,12 @@ $ ->
           gameId: gameId, { merge: true }
         .catch (error) =>
           console.log 'error joining game'
+          
+      leaveGame: (event) ->
+        @firestore().collection('users').doc(@user.uid).set
+          gameId: null, { merge: true }
+        .catch (error) =>
+          console.log 'error leaving game'
           
       watchGame: (gameId) ->
         # Watch changes to this game.
