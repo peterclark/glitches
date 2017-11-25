@@ -4,16 +4,17 @@ main.gameroom(v-if="playing")
       .col-xs-11
         h4 {{ game.genre }}
       .col-xs-1
-        button.close(type='button', aria-label='Close', v-on:click='deleteGame')
+        button.close(type='button', aria-label='Close', v-on:click='deleteGame', v-if='canControlGame')
           span(aria-hidden='true') &times;
     .row
       .col-xs-12
         hr
         
-  .players(v-for="player in players")
-    img.rounded(v-bind:src="player.photoURL")
+  .players
+    .player(v-for="player in players")
+      img.rounded(v-bind:src="player.photoURL")
   
   .gameboard
-    .btn.btn-success(v-if='canStartGame')
+    .btn.btn-success(v-if='canControlGame')
       i.fa.fa-fw.fa-4x.fa-check
       div Start

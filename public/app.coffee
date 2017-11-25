@@ -24,7 +24,7 @@ $ ->
         @user && @user.gameId?
       signingIn: ->
         @isSigningIn == 'yes'
-      canStartGame: ->
+      canControlGame: ->
         @game and @game.hostId == @user.uid && @game.status == 'open'
         
     watch:
@@ -52,7 +52,6 @@ $ ->
         firebase.auth().onAuthStateChanged (user) =>
           if user
             @createUser( user )
-            @watchGames()
             @getGenres()
           else
             @removeUser()
@@ -70,6 +69,7 @@ $ ->
           
       # Stop watching changes to all games
       ignoreGames: ->
+        console.log 'stopped listenting to all games'
         @firestore().collection('games').onSnapshot () -> {}
 
       # Sign in a user with Github
@@ -108,9 +108,13 @@ $ ->
         @firestore().collection('users').doc(uid).onSnapshot (doc) =>
           if doc.exists
             console.log 'user modified'
+            gameId = doc.data().gameId
+            if gameId?
+              @game = @games.find (game) -> game.id == gameId
+              @watchGame( gameId )
+            else
+              @watchGames()
             @user = doc.data()
-            console.log "gameId is #{@user.gameId}"
-            @watchGame(@user.gameId) if @user.gameId?
           else
             @removeUser()
           console.table [@user]
@@ -130,9 +134,6 @@ $ ->
           genre: genre
           status: 'open'
         .then (game) =>
-          console.log game
-          @ignoreGames()
-          @watchGame( game.id )
           @firestore().collection('users').doc(@user.uid).set
             gameId: game.id, { merge: true }
         console.log "Creating #{genre} game"
@@ -140,19 +141,20 @@ $ ->
       joinGame: (event) ->
         gameId = $(event.target).data('game-id')
         @firestore().collection('users').doc(@user.uid).set
-          gameId: gameId,
-          { merge: true}
-        .then =>
-          @ignoreGames()
-          @watchGame( gameId )
+          gameId: gameId, { merge: true }
         .catch (error) =>
           console.log 'error joining game'
           
       watchGame: (gameId) ->
         # Watch changes to this game.
+        console.log "watching game #{gameId}"
+        @ignoreGames()
         @firestore().collection('games').doc(gameId).onSnapshot (doc) =>
-          @game = doc.data() if doc.exists
-          console.log "watching game #{@game.genre}"
+          console.log "Game #{gameId} changed"
+          if doc.exists
+            data = doc.data()
+            data.id = doc.id
+            @game = data 
         , (error) ->
           console.log "stopped listening to game"
           
