@@ -8,8 +8,8 @@ $ ->
     data:
       genres: []
       games: []
-      user: undefined
-      game: undefined
+      user: null
+      game: null
       players: []
       countdown: 5
       isSigningIn: localStorage.getItem('isSigningIn')
@@ -134,7 +134,7 @@ $ ->
           console.log "stopped listening to user"
 
       removeUser: ->
-        @user = undefined
+        @user = null
         @isSigningIn = 'no'
         console.log "No user logged in."
 
@@ -151,7 +151,7 @@ $ ->
         console.log "Creating #{genre} game"
         
       joinGame: (event) ->
-        gameId = $(event.target).data('game-id')
+        gameId = $(event.target).closest('button').data('game-id')
         @firestore().collection('users').doc(@user.uid).set
           gameId: gameId, { merge: true }
         .catch (error) =>
