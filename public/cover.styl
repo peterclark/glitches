@@ -1,5 +1,8 @@
 [v-cloak]
   display: none
+  
+.text-right
+  text-align: right
 
 .signin
   display: flex
@@ -26,6 +29,16 @@
   margin: 0
   align-items: center
   justify-content: space-around
+  
+.game-row
+  display: flex
+  align-items: center
+  justify-content: space-around
+  flex-wrap: wrap
+  
+.game-row .btn-game
+  margin: 1em
+  width: 150px
   
 .players
   display: flex
@@ -86,3 +99,22 @@ nav.navigation
 .game.photo
   height: 46px
   margin: .5em
+  
+.countdown
+  font-size: 4em
+  
+.bounce-enter-active 
+  font-size: 4em
+  animation: bounce-in 1s
+
+.bounce-leave-active
+  opacity: 0
+
+@keyframes bounce-in 
+  0% 
+    transform: scale(0)
+  50% 
+    transform: scale(2)
+  100% 
+    transform: scale(0)
+  

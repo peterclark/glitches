@@ -11,10 +11,12 @@ main.game(v-else-if="authenticated")
       .col-sm-12
         h3.center join a game
     .row
-      .col-xs-6.col-sm-4.col-md-3.col-lg-2(v-for="game in games")
-        include game.pug
-      .col-sm-12.center(v-if="games.length==0")
-        .alert.alert-info There are currently no active games
+      .game-row
+        div(v-for="game in games")
+          include game.pug
+      .game-row
+        div(v-if="games.length==0")
+          .alert.alert-info There are currently no active games
     .row
       .col-sm-12
         h3.center create a game

@@ -11,6 +11,7 @@ $ ->
       user: undefined
       game: undefined
       players: []
+      countdown: 5
       isSigningIn: localStorage.getItem('isSigningIn')
 
     created: ->
@@ -25,11 +26,21 @@ $ ->
       signingIn: ->
         @isSigningIn == 'yes'
       canControlGame: ->
-        @game and @game.hostId == @user.uid && @game.status == 'open'
+        @game and @game.status == 'open' and @game.hostId == @user.uid 
+      canLeaveGame: ->
+        @game and @game.status == 'open'
+      gameStarting: ->
+        @game and @game.status == 'starting'
+      gamePlaying: -> 
+        @game and @game.status == 'playing'
         
     watch:
       isSigningIn: (yesOrNo) ->
         localStorage.setItem( 'isSigningIn', yesOrNo )
+      countdown: ->
+        if @countdown < 0
+          clearInterval(@timer)
+          @playGame()
 
     methods:
       # Initialize Firebase Database
@@ -162,6 +173,7 @@ $ ->
             data = doc.data()
             data.id = doc.id
             @game = data 
+            @startCountdown(5) if @game.status == 'starting'
         , (error) ->
           console.log "stopped listening to game"
           
@@ -184,3 +196,44 @@ $ ->
           @watchGames()
         .catch (error) =>
           console.log error
+          
+      startCountdown: (seconds) ->
+        @coundown = seconds
+        @timer = setInterval =>
+          @countdown = @countdown - 1
+        , 1000
+          
+      # start a game
+      startGame: (event) ->
+        return unless @canControlGame?
+        @firestore().collection('games').doc( @game.id ).set
+          status: 'starting', { merge: true }
+        .then (game) =>
+          console.log "game #{@game.id} set to starting"
+        .catch (error) =>
+          console.log 'error setting game status to starting'
+          
+      # play the game
+      playGame: ->
+        @firestore().collection('games').doc( @game.id ).set
+          status: 'playing', { merge: true }
+        .then (game) =>
+          console.log "game #{@game.id} set to playing"
+        .catch (error) =>
+          console.log 'error setting game status to playing'
+          
+        # query moviedb api for movie in genre
+        # query moviedb for 3 other movies in same genre
+        # build movie description:
+        #  => year (3 sec delay)
+        #  => main actor (3 sec delay)
+        #  => tagline
+        #  => overview (1st 100 characters)
+        #  => poster image
+        # show winner or noboby
+        # show answer
+        # loop for 4 more questions
+        # then show scores of top 3 in reverse order
+        # store win for winner
+        # store # games for all
+        # back to listing of games
