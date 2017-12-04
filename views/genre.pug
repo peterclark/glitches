@@ -1,2 +1,2 @@
 p
-  button.btn.btn-primary.btn-lg.btn-block.create.game(v-on:click='createGame') {{ genre.name }}
+  button.btn.btn-primary.btn-lg.btn-block.create.game(v-on:click='createGame' v-bind:data-genre-id='genre.id') {{ genre.name }}

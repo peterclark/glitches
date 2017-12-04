@@ -21,7 +21,8 @@
     "gulp": "^3.9.1",
     "pug": "^2.0.0-alpha6",
     "axios": "^0.17.1",
-    "firebase": "^4.6.1"
+    "firebase": "^4.6.1",
+    "firebase-admin": "^5.5.1"
   },
   "engines": {
     "node": "6.9.2"

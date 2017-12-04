@@ -7,7 +7,7 @@ bodyParser        = require 'body-parser'
 stylish           = require 'stylish'
 autoprefixer      = require 'autoprefixer-stylus'
 axios             = require 'axios'
-moviedb           = require('./moviedb')
+moviedb           = require './moviedb'
 
 moviedb.genres().then (genres) -> 
   app.set 'genres', genres
@@ -44,9 +44,8 @@ app.use stylish
 PORT = 3000
 app.listen PORT, ->
   console.log "Your app is running on #{PORT}"
-
+            
 # ROUTES
-
 app.get '/', (req, res) ->
   res.render 'index.pug'
 

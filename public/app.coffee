@@ -1,7 +1,7 @@
 
 $ ->
   
-  new Vue
+  window.app = new Vue
 
     el: '#game'
 
@@ -51,12 +51,10 @@ $ ->
         firebase.firestore()
 
       firebaseConfig: ->
-        apiKey: "AIzaSyAMzN83nuL4FC8ThBy9Jyg8CqebMA4FSMk"
-        authDomain: "peter-cd63b.firebaseapp.com"
-        databaseURL: "https://peter-cd63b.firebaseio.com"
-        projectId: "peter-cd63b"
-        storageBucket: "peter-cd63b.appspot.com"
-        messagingSenderId: "341628290433"
+        apiKey: "AIzaSyBiL1Ikw4zCZ-0T3YxmuWPXKZDxAu4UuRo"
+        authDomain: "trivia-17e61.firebaseapp.com"
+        databaseURL: "https://trivia-17e61.firebaseio.com"
+        projectId: "trivia-17e61"
 
       # Watch for firebase authentication
       watchAuth: ->
@@ -88,6 +86,7 @@ $ ->
       signIn: (event) ->
         @isSigningIn = 'yes'
         provider = new firebase.auth.GithubAuthProvider()
+        console.log provider
         firebase.auth().signInWithRedirect( provider )
 
       # Logout a user
@@ -102,6 +101,7 @@ $ ->
             @genres.push genre
 
       createUser: (user) ->
+        console.log user.uid
         @firestore().collection("users").doc(user.uid).set
           uid: user.uid
           displayName: user.displayName
@@ -110,10 +110,9 @@ $ ->
           lastLoginAt: new Date(),
           { merge: true }
         .then =>
-          console.log "#{user.displayName} is logged in."
           @watchUser(user.uid)
         .catch (error) =>
-          console.error "Error writing document: #{error}"
+          console.log "Error writing document: #{error}"
 
       # Watch changes to this user
       watchUser: (uid) ->
@@ -139,11 +138,12 @@ $ ->
         console.log "No user logged in."
 
       createGame: (event) ->
-        genre = $(event.target).text()
+        button = $(event.target)
         @firestore().collection('games').add
           hostId: @user.uid
           photoURL: @user.photoURL
-          genre: genre
+          genre: button.text()
+          genreId: button.data('genre-id')
           status: 'open'
         .then (game) =>
           @firestore().collection('users').doc(@user.uid).set
@@ -172,8 +172,8 @@ $ ->
           if doc.exists
             data = doc.data()
             data.id = doc.id
-            @game = data 
-            @startCountdown(5) if @game.status == 'starting'
+            @game = data
+            @controlGame
         , (error) ->
           console.log "stopped listening to game"
           
@@ -221,9 +221,12 @@ $ ->
           console.log "game #{@game.id} set to playing"
         .catch (error) =>
           console.log 'error setting game status to playing'
+        
+      # show question
+      controlGame: ->
+        switch @game.status
+          when 'starting' then @startCountdown(5)
           
-        # query moviedb api for movie in genre
-        # query moviedb for 3 other movies in same genre
         # build movie description:
         #  => year (3 sec delay)
         #  => main actor (3 sec delay)
