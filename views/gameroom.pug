@@ -30,9 +30,11 @@ main.gameroom(v-if="playing")
     .playing(v-else-if='gamePlaying')
       .container
         .hint(v-for="(hint, index) in hints")
-          transition(name='hint' v-if='index==hintNumber' appear)
+          transition(name='hint' v-if='index==hintNumber' appear) 
             .row
-              .col-sm-12.center(v-html="hint")
-        hr
-        .choice.center(v-for="choice in choices")
-          .btn.btn-secondary.btn-lg.btn-block {{ choice }}
+              .col-sm-12.center
+                .hint-box(v-html="hint")
+        .row
+          .col-sm-12.col-md-6.offset-md-3
+            .choice.center(v-for="choice in choices")
+              .btn.btn-secondary.btn-lg.btn-block {{ choice }}

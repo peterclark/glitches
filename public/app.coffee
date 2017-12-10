@@ -44,6 +44,9 @@ $ ->
         if @countdown < 0
           clearInterval(@timer)
           @playGame()
+      hintNumber: ->
+        if @hintNumber > 3
+          clearInterval(@hintTimer)
 
     methods:
       # Initialize Firebase Database
@@ -241,6 +244,14 @@ $ ->
             choices = doc.data().choices
             choices.forEach (choice) =>
               @choices.push choice
+            
+            @showHints()
+            
+      showHints: ->
+        @hintTimer = setInterval =>
+          @hintNumber = @hintNumber + 1
+        , 8000
+        
           
         # build movie description:
         #  => year (3 sec delay)
