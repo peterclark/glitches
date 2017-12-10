@@ -1,11 +1,14 @@
 
 $ ->
   
-  window.app = new Vue
+  new Vue
 
     el: '#game'
 
     data:
+      hintNumber: 0
+      hints: []
+      choices: []
       genres: []
       games: []
       user: null
@@ -66,7 +69,7 @@ $ ->
           else
             @removeUser()
 
-      # Watch changes to firebase games
+      # Watch changes to open firebase games
       watchGames: ->
         @firestore().collection('games').onSnapshot (docs) =>
           @games.length = 0
@@ -123,6 +126,7 @@ $ ->
             if gameId?
               @game = @games.find (game) -> game.id == gameId
               @watchGame( gameId )
+              @watchTrivia( gameId )
             else
               @watchGames()
             @user = doc.data()
@@ -173,7 +177,7 @@ $ ->
             data = doc.data()
             data.id = doc.id
             @game = data
-            @controlGame
+            @startCountdown(5) if @game.status == 'starting'
         , (error) ->
           console.log "stopped listening to game"
           
@@ -208,7 +212,7 @@ $ ->
         return unless @canControlGame?
         @firestore().collection('games').doc( @game.id ).set
           status: 'starting', { merge: true }
-        .then (game) =>
+        .then =>
           console.log "game #{@game.id} set to starting"
         .catch (error) =>
           console.log 'error setting game status to starting'
@@ -217,15 +221,26 @@ $ ->
       playGame: ->
         @firestore().collection('games').doc( @game.id ).set
           status: 'playing', { merge: true }
-        .then (game) =>
+        .then =>
+          @watchTrivia( @game.id )
           console.log "game #{@game.id} set to playing"
         .catch (error) =>
           console.log 'error setting game status to playing'
-        
-      # show question
-      controlGame: ->
-        switch @game.status
-          when 'starting' then @startCountdown(5)
+          console.log error
+          
+      watchTrivia: (gameId) ->
+        @firestore().collection('trivia').doc( gameId ).onSnapshot (doc) =>
+          if doc.exists
+            
+            @hints.length = 0
+            hints = doc.data().hints
+            hints.forEach (hint) =>
+              @hints.push hint
+              
+            @choices.length = 0
+            choices = doc.data().choices
+            choices.forEach (choice) =>
+              @choices.push choice
           
         # build movie description:
         #  => year (3 sec delay)

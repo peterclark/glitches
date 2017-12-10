@@ -8,9 +8,14 @@ stylish           = require 'stylish'
 autoprefixer      = require 'autoprefixer-stylus'
 axios             = require 'axios'
 moviedb           = require './moviedb'
+firestore         = require './firestore'
 
+# set genres on server
 moviedb.genres().then (genres) -> 
   app.set 'genres', genres
+
+# start watching games
+firestore.watchGames()
 
 app.use(express.static('assets'))
 

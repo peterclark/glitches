@@ -1,33 +1,38 @@
-# firebaseAdmin   = require 'firebase-admin' 
-# serviceAccount  = require './firebase.json' 
-# moviedb         = require './moviedb'
+firebaseAdmin   = require 'firebase-admin' 
+serviceAccount  = require './firebase.json' 
+moviedb         = require './moviedb'
+underscore      = require 'underscore'
 
-# class Firestore
+class Firestore
   
-#   constructor: ->
-#     firebaseAdmin.initializeApp
-#       credential: firebaseAdmin.credential.cert(serviceAccount)
-      
-#   database: ->
-#     firebaseAdmin.firestore()
+  constructor: () ->
+    firebaseAdmin.initializeApp
+      credential: firebaseAdmin.credential.cert(serviceAccount)
+    @database = firebaseAdmin.firestore()
     
-#   watchGames: ->
-#     firestore.collection('games').onSnapshot (games) ->
-#       pushQuestionTo game for game in games when game.data().status is 'starting'
-                
-#   pushQuestionTo: (game) ->
-#     game = game.data()
-#     moviedb.getMovies( game.genreId ).then (movies) ->
-#       movies.forEach (movie) ->
-#         console.log movie.title
-#         firestore.collection('questions').add
-#           id: movie.id
-#           title: movie.title
-#           release_date: movie.release_date
-#           overview: movie.review
-#           gameId: game.id
-#         .then (question) =>
-#           console.log "Created question for #{movie.title}"
-    
+  watchGames: ->
+    @database.collection('games').where("status", "==", "playing").onSnapshot (snapshot) =>
+      snapshot.docChanges.forEach (change) =>
+        if change.type == 'added'
+          @addTriviaToGame(change.doc)
+        else if change.type == 'removed'
+          @removeTriviaForGame( change.doc )
+          
+  addTriviaToGame: (game) ->
+    moviedb.getMovies(game.data().genreId).then (movies) =>
+      answer = movies[0]
+      movies = underscore.shuffle movies[0..3]
+      @database.collection('trivia').doc(game.id).set
+        hints: [
+          "Released in #{answer.releaseYear()}",
+          answer.shortOverview(),
+          answer.backdropImageTag()
+        ]
+        choices: (movie.title for movie in movies)
+        answer: answer.title
+  
+  removeTriviaForGame: (game) ->
+    @database.collection('trivia').doc(game.id).delete().then ->
+      console.log "deleted trivia for game #{game.id}"
 
-# module.exports = (new Firestore).database()
+module.exports = new Firestore

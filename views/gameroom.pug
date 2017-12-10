@@ -28,4 +28,11 @@ main.gameroom(v-if="playing")
         transition(name='bounce' v-if='countdown == number' appear)
           .countdown.text-muted {{ countdown }}
     .playing(v-else-if='gamePlaying')
-      p Playing Game...
+      .container
+        .hint(v-for="(hint, index) in hints")
+          transition(name='hint' v-if='index==hintNumber' appear)
+            .row
+              .col-sm-12.center(v-html="hint")
+        hr
+        .choice.center(v-for="choice in choices")
+          .btn.btn-secondary.btn-lg.btn-block {{ choice }}

@@ -1,4 +1,5 @@
-axios = require 'axios'
+axios      = require 'axios'
+underscore = require 'underscore'
 
 class MovieDB
   
@@ -38,8 +39,36 @@ class MovieDB
       '&' + @page() +
       '&' + @api()
     axios.get( movie_url ).then (response) =>
-      @shuffle response.data.results
+      movies = (new Movie(movie) for movie in response.data.results)
+      underscore.shuffle movies
     .catch (error) ->
       console.log error
     
 module.exports = new MovieDB( process.env.MOVIEDB_API_KEY ) 
+
+
+class Movie
+  
+  constructor: (data) ->
+    @id            = data.id
+    @title         = data.title
+    @posterPath    = data.poster_path
+    @backdropPath  = data.backdrop_path
+    @overview      = data.overview
+    @releaseDate   = data.release_date
+    
+  backdropImageURL: ->
+    "https://image.tmdb.org/t/p/w300" + @backdropPath
+    
+  backdropImageTag: ->
+    "<img src='#{@backdropImageURL()}'>"
+    
+  posterImageURL: ->
+    "https://image.tmdb.org/t/p/w300" + @posterPath
+    
+  releaseYear: ->
+    date = new Date(@releaseDate)
+    date.getFullYear()
+    
+  shortOverview: ->
+    @overview.split(' ')[0..15].join(' ') + '...'
