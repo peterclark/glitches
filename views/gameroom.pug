@@ -1,9 +1,11 @@
 main.gameroom(v-if="playing")
   .container
     .row
-      .col-xs-10
+      .col-xs-4
         h4 {{ game.genre }}
-      .col-xs-2.text-right
+      .col-xs-4.center
+        h4.hint-score(v-if='gamePlaying') {{ hintScore }}
+      .col-xs-4.text-right
         button.close(type='button' aria-label='Close' v-on:click='deleteGame' v-if='canControlGame')
           span(aria-hidden='true') &times;
         button.btn.btn-link.leave.game.text-muted(type='button' title='leave game' v-on:click='leaveGame' v-else-if='canLeaveGame')

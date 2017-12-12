@@ -26,7 +26,8 @@ class Firestore
         hints: [
           "Released in #{answer.releaseYear()}",
           answer.shortOverview(),
-          answer.backdropImageTag()
+          answer.backdropImageTag(),
+          answer.posterImageTag()
         ]
         choices: (movie.title for movie in movies)
         answer: answer.title

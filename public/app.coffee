@@ -6,7 +6,10 @@ $ ->
     el: '#game'
 
     data:
+      score: 0
+      hintDuration: 3
       hintNumber: 0
+      hintScore: 0
       hints: []
       choices: []
       genres: []
@@ -47,6 +50,8 @@ $ ->
       hintNumber: ->
         if @hintNumber > 3
           clearInterval(@hintTimer)
+          clearInterval(@scoreTimer)
+          @hintScore = 0
 
     methods:
       # Initialize Firebase Database
@@ -248,9 +253,14 @@ $ ->
             @showHints()
             
       showHints: ->
+        @hintScore = @hintDuration*10*@hints.length
+        @scoreTimer = setInterval =>
+          @hintScore = @hintScore - 1
+        , 100
+        
         @hintTimer = setInterval =>
           @hintNumber = @hintNumber + 1
-        , 8000
+        , @hintDuration*1000
         
           
         # build movie description:

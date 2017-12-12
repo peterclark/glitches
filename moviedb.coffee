@@ -64,7 +64,10 @@ class Movie
     "<img src='#{@backdropImageURL()}'>"
     
   posterImageURL: ->
-    "https://image.tmdb.org/t/p/w300" + @posterPath
+    "https://image.tmdb.org/t/p/w92" + @posterPath
+    
+  posterImageTag: ->
+    "<img src='#{@posterImageURL()}'>"
     
   releaseYear: ->
     date = new Date(@releaseDate)
