@@ -11,7 +11,9 @@ $ ->
       hintNumber: 0
       hintScore: 0
       hints: []
+      scores: null
       choices: []
+      answer: null
       genres: []
       games: []
       user: null
@@ -39,6 +41,8 @@ $ ->
         @game and @game.status == 'starting'
       gamePlaying: -> 
         @game and @game.status == 'playing'
+      gameOver: ->
+        @game and @game.status == 'over'
         
     watch:
       isSigningIn: (yesOrNo) ->
@@ -52,6 +56,7 @@ $ ->
           clearInterval(@hintTimer)
           clearInterval(@scoreTimer)
           @hintScore = 0
+          @endGame()
 
     methods:
       # Initialize Firebase Database
@@ -185,7 +190,12 @@ $ ->
             data = doc.data()
             data.id = doc.id
             @game = data
-            @startCountdown(5) if @game.status == 'starting'
+            if @game.status == 'starting'
+              @startCountdown(5)
+            @players.forEach (player) =>
+              if @game.scores?
+                player.answered = @game.scores[player.uid]?
+              
         , (error) ->
           console.log "stopped listening to game"
           
@@ -236,6 +246,10 @@ $ ->
           console.log 'error setting game status to playing'
           console.log error
           
+      # end the game locally for the user
+      endGame: ->
+        @game.status = 'over'
+          
       watchTrivia: (gameId) ->
         @firestore().collection('trivia').doc( gameId ).onSnapshot (doc) =>
           if doc.exists
@@ -249,11 +263,14 @@ $ ->
             choices = doc.data().choices
             choices.forEach (choice) =>
               @choices.push choice
+              
+            @answer = doc.data().answer
             
             @showHints()
             
       showHints: ->
         @hintScore = @hintDuration*10*@hints.length
+        clearInterval(@scoreTimer)
         @scoreTimer = setInterval =>
           @hintScore = @hintScore - 1
         , 100
@@ -262,13 +279,27 @@ $ ->
           @hintNumber = @hintNumber + 1
         , @hintDuration*1000
         
-          
-        # build movie description:
-        #  => year (3 sec delay)
-        #  => main actor (3 sec delay)
-        #  => tagline
-        #  => overview (1st 100 characters)
-        #  => poster image
+      selectAnswer: (event) ->
+        button = $(event.target)
+        answer = button.text()
+        score = if answer==@answer then @hintScore else 0
+        axios.post '/score', 
+          gameId: @user.gameId
+          uid: @user.uid,
+          score: score
+        .then (res) ->
+          console.log res
+        .catch (error) ->
+          console.log error
+        
+        # @firestore().collection('games').doc(@game.id).update
+        #   "scores.#{@user.uid}": score
+        # .then ->
+        #   console.log 'score registered'
+        # .catch (error) ->
+        #   console.log 'There was an error selecting the answer'
+            
+        
         # show winner or noboby
         # show answer
         # loop for 4 more questions

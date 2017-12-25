@@ -6,7 +6,7 @@ main.gameroom(v-if="playing")
       .col-xs-4.center
         h4.hint-score(v-if='gamePlaying') {{ hintScore }}
       .col-xs-4.text-right
-        button.close(type='button' aria-label='Close' v-on:click='deleteGame' v-if='canControlGame')
+        button.close(type='button' aria-label='Close' v-on:click='deleteGame' v-if='true || canControlGame')
           span(aria-hidden='true') &times;
         button.btn.btn-link.leave.game.text-muted(type='button' title='leave game' v-on:click='leaveGame' v-else-if='canLeaveGame')
           i.fa.fa-fw.fa-sign-out
@@ -19,6 +19,8 @@ main.gameroom(v-if="playing")
   .players
     .player(v-for="player in players")
       img.rounded(v-bind:src="player.photoURL")
+      .answered(v-if="player.answered")
+        i.fa.fa-fw.fa-check.text-success
   
   .gameboard
     .btn.btn-success.btn-lg.start.game(v-if='canControlGame' v-on:click='startGame')
@@ -30,13 +32,15 @@ main.gameroom(v-if="playing")
         transition(name='bounce' v-if='countdown == number' appear)
           .countdown.text-muted {{ countdown }}
     .playing(v-else-if='gamePlaying')
-      .container
-        .hint(v-for="(hint, index) in hints")
-          transition(name='hint' v-if='index==hintNumber' appear) 
-            .row
-              .col-sm-12.center
-                .hint-box(v-html="hint")
-        .row
-          .col-sm-12.col-md-6.offset-md-3
-            .choice.center(v-for="choice in choices")
-              .btn.btn-secondary.btn-lg.btn-block {{ choice }}
+      .trivia-box
+        .hints
+          .hint.center(v-for="(hint, index) in hints")
+            transition(name='hint' v-if='index==hintNumber' appear) 
+              .hint-box(v-html="hint")
+          .hint.center(v-if="hintNumber==4")
+            | Times Up!
+        .choices
+          .choice.center(v-for="choice in choices")
+            .btn.btn-secondary.btn-lg.btn-block(v-on:click='selectAnswer') {{ choice }}
+    .over(v-else-if='gameOver')
+      | Game is Over

@@ -117,10 +117,6 @@ nav.navigation
     transform: scale(2)
   100% 
     transform: scale(0)
-
-.hint
-  color: #555
-  font-size: 2em
   
 .hint-enter-active
   animation: hint-in 3s
@@ -132,14 +128,27 @@ nav.navigation
   100%
     transform: scale(1)
     opacity: 1
-
-.hint-box
-  padding: 2rem 1rem
-  margin-bottom: 1rem
-  
-.choice
-  margin-bottom: 1rem
   
 .hint-score
   color: #aaa
+  
+.trivia-box
+  display: flex
+  flex-direction: column
+  justify-content: space-around
+  align-items: center
+  height: 75vh
+  
+
+.hints
+  color: #555
+  font-size: 1.5rem
+  flex: 1
+  margin: 1em
+  
+.choices
+  flex: 1
+
+.choice
+  margin: 1em 0
   

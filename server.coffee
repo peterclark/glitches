@@ -56,3 +56,13 @@ app.get '/', (req, res) ->
 
 app.get '/genres', (req, res) ->
   res.json app.get('genres')
+  
+app.post '/score', (req, res) ->
+  uid = req.body.uid
+  score = req.body.score
+  gameId = req.body.gameId
+  if uid? and score? and gameId?
+    firestore.registerScoreForUser( uid, score, gameId )
+    res.sendStatus 200
+  else
+    res.sendStatus 422

@@ -73,5 +73,8 @@ class Movie
     date = new Date(@releaseDate)
     date.getFullYear()
     
+  releasedIn: ->
+    "Released in #{@releaseYear()}"
+    
   shortOverview: ->
     @overview.split(' ')[0..15].join(' ') + '...'

@@ -24,7 +24,7 @@ class Firestore
       movies = underscore.shuffle movies[0..3]
       @database.collection('trivia').doc(game.id).set
         hints: [
-          "Released in #{answer.releaseYear()}",
+          answer.releasedIn(),
           answer.shortOverview(),
           answer.backdropImageTag(),
           answer.posterImageTag()
@@ -35,5 +35,9 @@ class Firestore
   removeTriviaForGame: (game) ->
     @database.collection('trivia').doc(game.id).delete().then ->
       console.log "deleted trivia for game #{game.id}"
+      
+  registerScoreForUser: (uid, score, gameId) ->
+    @database.collection('games').doc(gameId).update
+      "scores.#{uid}": score
 
 module.exports = new Firestore
