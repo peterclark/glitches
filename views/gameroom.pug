@@ -19,8 +19,8 @@ main.gameroom(v-if="playing")
   .players
     .player(v-for="player in players")
       img.rounded(v-bind:src="player.photoURL")
-      .answered(v-if="player.answered")
-        i.fa.fa-fw.fa-check.text-success
+      .answered.center(v-if="player.answered")
+        small.text-success {{ player.answered }}
   
   .gameboard
     .btn.btn-success.btn-lg.start.game(v-if='canControlGame' v-on:click='startGame')

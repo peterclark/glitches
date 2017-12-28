@@ -31,6 +31,8 @@ class Firestore
         ]
         choices: (movie.title for movie in movies)
         answer: answer.title
+      .then =>
+        @endGame(game.id)
   
   removeTriviaForGame: (game) ->
     @database.collection('trivia').doc(game.id).delete().then ->
@@ -39,5 +41,12 @@ class Firestore
   registerScoreForUser: (uid, score, gameId) ->
     @database.collection('games').doc(gameId).update
       "scores.#{uid}": score
+      
+  endGame: (gameId) ->
+    setTimeout =>
+      @database.collection('games').doc(gameId).update
+        status: 'over'
+      console.log "Ending game #{gameId}"
+    , 24000
 
 module.exports = new Firestore

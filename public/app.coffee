@@ -7,7 +7,7 @@ $ ->
 
     data:
       score: 0
-      hintDuration: 3
+      hintDuration: 6
       hintNumber: 0
       hintScore: 0
       hints: []
@@ -56,7 +56,6 @@ $ ->
           clearInterval(@hintTimer)
           clearInterval(@scoreTimer)
           @hintScore = 0
-          @endGame()
 
     methods:
       # Initialize Firebase Database
@@ -156,10 +155,11 @@ $ ->
 
       createGame: (event) ->
         button = $(event.target)
+        genre = button.text()
         @firestore().collection('games').add
           hostId: @user.uid
           photoURL: @user.photoURL
-          genre: button.text()
+          genre: genre
           genreId: button.data('genre-id')
           status: 'open'
         .then (game) =>
@@ -193,8 +193,8 @@ $ ->
             if @game.status == 'starting'
               @startCountdown(5)
             @players.forEach (player) =>
-              if @game.scores?
-                player.answered = @game.scores[player.uid]?
+              @game.scores = {} unless @game.scores?
+              player.answered = @game.scores[player.uid]
               
         , (error) ->
           console.log "stopped listening to game"
@@ -270,11 +270,14 @@ $ ->
             
       showHints: ->
         @hintScore = @hintDuration*10*@hints.length
+        
         clearInterval(@scoreTimer)
         @scoreTimer = setInterval =>
           @hintScore = @hintScore - 1
         , 100
         
+        clearInterval(@hintTimer)
+        @hintNumber = 0
         @hintTimer = setInterval =>
           @hintNumber = @hintNumber + 1
         , @hintDuration*1000
@@ -291,13 +294,6 @@ $ ->
           console.log res
         .catch (error) ->
           console.log error
-        
-        # @firestore().collection('games').doc(@game.id).update
-        #   "scores.#{@user.uid}": score
-        # .then ->
-        #   console.log 'score registered'
-        # .catch (error) ->
-        #   console.log 'There was an error selecting the answer'
             
         
         # show winner or noboby

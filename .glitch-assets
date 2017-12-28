@@ -15,3 +15,6 @@
 {"name":"micah.jpg","date":"2016-12-31T15:55:44.653Z","url":"https://cdn.gomix.com/03b883c2-ef61-4845-aee6-d23eed3d7222%2Fmicah.jpg","type":"image/jpeg","size":136056,"imageWidth":1601,"imageHeight":1591,"thumbnail":"https://cdn.gomix.com/03b883c2-ef61-4845-aee6-d23eed3d7222%2Fthumbnails%2Fmicah.jpg","thumbnailWidth":330,"thumbnailHeight":328,"dominantColor":"rgb(28,28,28)","uuid":"2u4S3G2fRH5JOdRR"}
 {"name":"leah.jpg","date":"2016-12-31T16:17:38.660Z","url":"https://cdn.gomix.com/03b883c2-ef61-4845-aee6-d23eed3d7222%2Fleah.jpg","type":"image/jpeg","size":492041,"imageWidth":706,"imageHeight":709,"thumbnail":"https://cdn.gomix.com/03b883c2-ef61-4845-aee6-d23eed3d7222%2Fthumbnails%2Fleah.jpg","thumbnailWidth":329,"thumbnailHeight":330,"dominantColor":"rgb(40,45,85)","uuid":"uhrOwwc1hcByNTtN"}
 {"name":"becca.jpg","date":"2016-12-31T17:31:18.284Z","url":"https://cdn.gomix.com/03b883c2-ef61-4845-aee6-d23eed3d7222%2Fbecca.jpg","type":"image/jpeg","size":286975,"imageWidth":551,"imageHeight":557,"thumbnail":"https://cdn.gomix.com/03b883c2-ef61-4845-aee6-d23eed3d7222%2Fthumbnails%2Fbecca.jpg","thumbnailWidth":327,"thumbnailHeight":330,"dominantColor":"rgb(250,244,246)","uuid":"8XZKT9DMqLfTRu0a"}
+{"uuid":"2u4S3G2fRH5JOdRR","deleted":true}
+{"uuid":"uhrOwwc1hcByNTtN","deleted":true}
+{"uuid":"8XZKT9DMqLfTRu0a","deleted":true}
