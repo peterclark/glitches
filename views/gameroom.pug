@@ -6,9 +6,9 @@ main.gameroom(v-if="playing")
       .col-xs-4.center
         h4.hint-score(v-if='gamePlaying') {{ hintScore }}
       .col-xs-4.text-right
-        button.close(type='button' aria-label='Close' v-on:click='deleteGame' v-if='true || canControlGame')
+        button.close(type='button' aria-label='Close' v-on:click='deleteGame' v-if='gameHost || gameOver')
           span(aria-hidden='true') &times;
-        button.btn.btn-link.leave.game.text-muted(type='button' title='leave game' v-on:click='leaveGame' v-else-if='canLeaveGame')
+        button.btn.btn-link.leave.game.text-muted(type='button' title='leave game' v-on:click='leaveGame' v-else-if='gameOpen')
           i.fa.fa-fw.fa-sign-out
         button.btn.btn-link.text-muted(type='button' title='playing' disabled v-else)
           i.fa.fa-fw.fa-play
@@ -19,13 +19,13 @@ main.gameroom(v-if="playing")
   .players
     .player(v-for="player in players")
       img.rounded(v-bind:src="player.photoURL")
-      .answered.center(v-if="player.answered")
+      .answered.center(v-if="player.answered >= 0")
         small.text-success {{ player.answered }}
   
   .gameboard
-    .btn.btn-success.btn-lg.start.game(v-if='canControlGame' v-on:click='startGame')
+    .btn.btn-success.btn-lg.start.game(v-if='gameHost' v-on:click='startGame')
       | Start Game
-    .waiting(v-else-if='canLeaveGame')
+    .waiting(v-else-if='gameOpen')
       .text-muted waiting for host to start game...
     .started(v-else-if='gameStarting')
       div(v-for='number in [5,4,3,2,1]')
@@ -37,10 +37,8 @@ main.gameroom(v-if="playing")
           .hint.center(v-for="(hint, index) in hints")
             transition(name='hint' v-if='index==hintNumber' appear) 
               .hint-box(v-html="hint")
-          .hint.center(v-if="hintNumber==4")
-            | Times Up!
         .choices
           .choice.center(v-for="choice in choices")
-            .btn.btn-secondary.btn-lg.btn-block(v-on:click='selectAnswer') {{ choice }}
+            button.btn.btn-secondary.btn-lg.btn-block(v-on:click='selectAnswer' v-bind:disabled='!showChoices') {{ choice }}
     .over(v-else-if='gameOver')
       | Game is Over

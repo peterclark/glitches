@@ -13,6 +13,7 @@ $ ->
       hints: []
       scores: null
       choices: []
+      showChoices: true
       answer: null
       genres: []
       games: []
@@ -33,9 +34,9 @@ $ ->
         @user && @user.gameId?
       signingIn: ->
         @isSigningIn == 'yes'
-      canControlGame: ->
-        @game and @game.status == 'open' and @game.hostId == @user.uid 
-      canLeaveGame: ->
+      gameHost: ->
+        @game and @game.status == 'open' and @game.hostId == @user.uid
+      gameOpen: ->
         @game and @game.status == 'open'
       gameStarting: ->
         @game and @game.status == 'starting'
@@ -220,14 +221,14 @@ $ ->
           console.log error
           
       startCountdown: (seconds) ->
-        @coundown = seconds
+        @countdown = seconds
         @timer = setInterval =>
           @countdown = @countdown - 1
         , 1000
           
       # start a game
       startGame: (event) ->
-        return unless @canControlGame?
+        return unless @gameHost?
         @firestore().collection('games').doc( @game.id ).set
           status: 'starting', { merge: true }
         .then =>
@@ -237,6 +238,7 @@ $ ->
           
       # play the game
       playGame: ->
+        @showChoices = true
         @firestore().collection('games').doc( @game.id ).set
           status: 'playing', { merge: true }
         .then =>
@@ -286,6 +288,7 @@ $ ->
         button = $(event.target)
         answer = button.text()
         score = if answer==@answer then @hintScore else 0
+        @showChoices = false
         axios.post '/score', 
           gameId: @user.gameId
           uid: @user.uid,
