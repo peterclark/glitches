@@ -118,13 +118,12 @@ $ ->
 
       createUser: (user) ->
         console.log user.uid
-        @firestore().collection("users").doc(user.uid).set
+        @firestore().collection("users").doc(user.uid).update
           uid: user.uid
           displayName: user.displayName
           email: user.email
           photoURL: user.photoURL
-          lastLoginAt: new Date(),
-          { merge: true }
+          lastLoginAt: new Date()
         .then =>
           @watchUser(user.uid)
         .catch (error) =>
@@ -164,20 +163,20 @@ $ ->
           genreId: button.data('genre-id')
           status: 'open'
         .then (game) =>
-          @firestore().collection('users').doc(@user.uid).set
-            gameId: game.id, { merge: true }
+          @firestore().collection('users').doc(@user.uid).update
+            gameId: game.id
         console.log "Creating #{genre} game"
         
       joinGame: (event) ->
         gameId = $(event.target).closest('button').data('game-id')
-        @firestore().collection('users').doc(@user.uid).set
-          gameId: gameId, { merge: true }
+        @firestore().collection('users').doc(@user.uid).update
+          gameId: gameId
         .catch (error) =>
           console.log 'error joining game'
           
       leaveGame: (event) ->
-        @firestore().collection('users').doc(@user.uid).set
-          gameId: null, { merge: true }
+        @firestore().collection('users').doc(@user.uid).update
+          gameId: null
         .catch (error) =>
           console.log 'error leaving game'
           
@@ -213,8 +212,8 @@ $ ->
       deleteGame: (event) ->
         gameId = @user.gameId
         @firestore().collection('games').doc( gameId ).delete().then =>
-          @firestore().collection('users').doc(@user.uid).set
-            gameId: null, { merge: true }
+          @firestore().collection('users').doc(@user.uid).update
+            gameId: null
           console.log "Game #{gameId} deleted by #{@user.displayName}."
           @watchGames()
         .catch (error) =>
@@ -229,8 +228,8 @@ $ ->
       # start a game
       startGame: (event) ->
         return unless @gameHost?
-        @firestore().collection('games').doc( @game.id ).set
-          status: 'starting', { merge: true }
+        @firestore().collection('games').doc( @game.id ).update
+          status: 'starting'
         .then =>
           console.log "game #{@game.id} set to starting"
         .catch (error) =>
@@ -239,8 +238,8 @@ $ ->
       # play the game
       playGame: ->
         @showChoices = true
-        @firestore().collection('games').doc( @game.id ).set
-          status: 'playing', { merge: true }
+        @firestore().collection('games').doc( @game.id ).update
+          status: 'playing'
         .then =>
           @watchTrivia( @game.id )
           console.log "game #{@game.id} set to playing"
@@ -299,10 +298,12 @@ $ ->
           console.log error
             
         
-        # show winner or noboby
-        # show answer
-        # loop for 4 more questions
-        # then show scores of top 3 in reverse order
-        # store win for winner
-        # store # games for all
-        # back to listing of games
+        # sort players by score left to right
+        # show movie poster for answer
+        # store totalScore for players
+        # store # of wins
+        # store # games played for all
+        # create /profile page
+        #  -> show games played
+        #  -> show total wins
+        
