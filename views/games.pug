@@ -1,8 +1,8 @@
 main.game(v-else-if="authenticated")
   nav.navigation
-    a.btn.btn-link(href='/genres') Genres
     button.btn.btn-link
       img.rounded(v-bind:src="user.photoURL")
+    a.btn.btn-link(href='/about') Movie Trivia
     button.btn.btn-link.signout-btn(v-on:click='signOut')
       i.fa.fa-fw.fa-sign-out
 

@@ -35,7 +35,7 @@ $ ->
       signingIn: ->
         @isSigningIn == 'yes'
       gameHost: ->
-        @game and @game.status == 'open' and @game.hostId == @user.uid
+        @game and @game.hostId == @user.uid
       gameOpen: ->
         @game and @game.status == 'open'
       gameStarting: ->
@@ -84,7 +84,7 @@ $ ->
 
       # Watch changes to open firebase games
       watchGames: ->
-        @firestore().collection('games').onSnapshot (docs) =>
+        @firestore().collection('games').where('status', '==', 'open').onSnapshot (docs) =>
           @games.length = 0
           docs.forEach (doc) =>
             data = doc.data() 
@@ -118,12 +118,13 @@ $ ->
 
       createUser: (user) ->
         console.log user.uid
-        @firestore().collection("users").doc(user.uid).update
+        @firestore().collection("users").doc(user.uid).set
           uid: user.uid
           displayName: user.displayName
           email: user.email
           photoURL: user.photoURL
-          lastLoginAt: new Date()
+          lastLoginAt: new Date(),
+          { merge: true }
         .then =>
           @watchUser(user.uid)
         .catch (error) =>
@@ -195,7 +196,9 @@ $ ->
             @players.forEach (player) =>
               @game.scores = {} unless @game.scores?
               player.answered = @game.scores[player.uid]
-              
+          else
+            @firestore().collection('users').doc(@user.uid).update
+              gameId: null
         , (error) ->
           console.log "stopped listening to game"
           
@@ -210,10 +213,9 @@ $ ->
         
       # remove this game and start watching all games again.
       deleteGame: (event) ->
+        return unless @gameHost?
         gameId = @user.gameId
         @firestore().collection('games').doc( gameId ).delete().then =>
-          @firestore().collection('users').doc(@user.uid).update
-            gameId: null
           console.log "Game #{gameId} deleted by #{@user.displayName}."
           @watchGames()
         .catch (error) =>

@@ -53,6 +53,9 @@ app.listen PORT, ->
 # ROUTES
 app.get '/', (req, res) ->
   res.render 'index.pug'
+  
+app.get '/about', (req, res) ->
+  res.render 'about.pug'
 
 app.get '/genres', (req, res) ->
   res.json app.get('genres')
