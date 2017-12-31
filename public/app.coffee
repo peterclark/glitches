@@ -99,9 +99,16 @@ $ ->
         @firestore().collection('games').onSnapshot () -> {}
 
       # Sign in a user with Github
-      signIn: (event) ->
+      githubSignIn: (event) ->
         @isSigningIn = 'yes'
         provider = new firebase.auth.GithubAuthProvider()
+        console.log provider
+        firebase.auth().signInWithRedirect( provider )
+
+      # Sign in a user with Github
+      googleSignIn: (event) ->
+        @isSigningIn = 'yes'
+        provider = new firebase.auth.GoogleAuthProvider()
         console.log provider
         firebase.auth().signInWithRedirect( provider )
 
