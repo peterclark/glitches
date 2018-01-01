@@ -1,13 +1,15 @@
-main.signin(v-else)
+main(v-else)
 
-  button.btn.btn-github.signin-btn(v-on:click="githubSignIn" v-bind:disabled="signingIn")
-    i.fa.fa-fw.fa-4x.fa-github(v-show='!signingIn')
-    i.fa.fa-fw.fa-4x.fa-spinner.fa-pulse(v-show='signingInWithGithub')
+  div.signin(v-if='signingIn')
+    button.btn.signin-btn
+      i.fa.fa-fw.fa-4x.fa-spinner.fa-pulse
     
-  button.btn.btn-facebook.signin-btn(v-on:click="facebookSignIn" v-bind:disabled="signingIn")
-    i.fa.fa-fw.fa-4x.fa-facebook(v-show='!signingIn')
-    i.fa.fa-fw.fa-4x.fa-spinner.fa-pulse(v-show='signingInWithFacebook')
-    
-  button.btn.btn-google.signin-btn(v-on:click="googleSignIn" v-bind:disabled="signingIn")
-    i.fa.fa-fw.fa-4x.fa-google(v-show='!signingIn')
-    i.fa.fa-fw.fa-4x.fa-spinner.fa-pulse(v-show='signingInWithGoogle')
+  div.signin(v-else)
+    button.btn.btn-github.signin-btn(v-on:click="githubSignIn")
+      i.fa.fa-fw.fa-4x.fa-github
+
+    button.btn.btn-facebook.signin-btn(v-on:click="facebookSignIn")
+      i.fa.fa-fw.fa-4x.fa-facebook
+
+    button.btn.btn-google.signin-btn(v-on:click="googleSignIn")
+      i.fa.fa-fw.fa-4x.fa-google
