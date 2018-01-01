@@ -33,7 +33,13 @@ $ ->
       playing: ->
         @user && @user.gameId?
       signingIn: ->
-        @isSigningIn == 'yes'
+        @isSigningIn in ['github','google','facebook']
+      signingInWithGithub: ->
+        @isSigningIn == 'github'
+      signingInWithGoogle: ->
+        @isSigningIn == 'google'
+      signingInWithFacebook: ->
+        @isSigningIn == 'facebook'
       gameHost: ->
         @game and @game.hostId == @user.uid
       gameOpen: ->
@@ -100,15 +106,22 @@ $ ->
 
       # Sign in a user with Github
       githubSignIn: (event) ->
-        @isSigningIn = 'yes'
+        @isSigningIn = 'github'
         provider = new firebase.auth.GithubAuthProvider()
         console.log provider
         firebase.auth().signInWithRedirect( provider )
 
       # Sign in a user with Github
       googleSignIn: (event) ->
-        @isSigningIn = 'yes'
+        @isSigningIn = 'google'
         provider = new firebase.auth.GoogleAuthProvider()
+        console.log provider
+        firebase.auth().signInWithRedirect( provider )
+
+      # Sign in a user with Github
+      facebookSignIn: (event) ->
+        @isSigningIn = 'facebook'
+        provider = new firebase.auth.FacebookAuthProvider()
         console.log provider
         firebase.auth().signInWithRedirect( provider )
 

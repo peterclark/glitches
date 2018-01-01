@@ -1,9 +1,13 @@
 main.signin(v-else)
 
   button.btn.btn-github.signin-btn(v-on:click="githubSignIn" v-bind:disabled="signingIn")
-    i.fa.fa-fw.fa-4x.fa-github(v-bind:class="{ 'hidden-xs-up': signingIn }")
-    i.fa.fa-fw.fa-4x.fa-spinner.fa-pulse(v-bind:class="{ 'hidden-xs-up': !signingIn }")
+    i.fa.fa-fw.fa-4x.fa-github(v-show='!signingIn')
+    i.fa.fa-fw.fa-4x.fa-spinner.fa-pulse(v-show='signingInWithGithub')
+    
+  button.btn.btn-facebook.signin-btn(v-on:click="facebookSignIn" v-bind:disabled="signingIn")
+    i.fa.fa-fw.fa-4x.fa-facebook(v-show='!signingIn')
+    i.fa.fa-fw.fa-4x.fa-spinner.fa-pulse(v-show='signingInWithFacebook')
     
   button.btn.btn-google.signin-btn(v-on:click="googleSignIn" v-bind:disabled="signingIn")
-    i.fa.fa-fw.fa-4x.fa-google(v-bind:class="{ 'hidden-xs-up': signingIn }")
-    i.fa.fa-fw.fa-4x.fa-spinner.fa-pulse(v-bind:class="{ 'hidden-xs-up': !signingIn }")
+    i.fa.fa-fw.fa-4x.fa-google(v-show='!signingIn')
+    i.fa.fa-fw.fa-4x.fa-spinner.fa-pulse(v-show='signingInWithGoogle')
