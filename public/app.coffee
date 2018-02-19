@@ -33,13 +33,13 @@ $ ->
       playing: ->
         @user && @user.gameId?
       signingIn: ->
-        @isSigningIn in ['github','google','facebook']
+        @isSigningIn in ['github.com','google.com','facebook.com']
       signingInWithGithub: ->
-        @isSigningIn == 'github'
+        @isSigningIn == 'github.com'
       signingInWithGoogle: ->
-        @isSigningIn == 'google'
+        @isSigningIn == 'google.com'
       signingInWithFacebook: ->
-        @isSigningIn == 'facebook'
+        @isSigningIn == 'facebook.com'
       gameHost: ->
         @game and @game.hostId == @user.uid
       gameOpen: ->
@@ -56,7 +56,7 @@ $ ->
         localStorage.setItem( 'isSigningIn', yesOrNo )
       countdown: ->
         if @countdown < 0
-          clearInterval(@timer)
+          clearInterval(@countdownTimer)
           @playGame()
       hintNumber: ->
         if @hintNumber > 3
@@ -80,6 +80,16 @@ $ ->
 
       # Watch for firebase authentication
       watchAuth: ->
+        firebase.auth().getRedirectResult()
+        .then (result) ->
+          console.log "Successful sign in for #{result.user.displayName}"
+        .catch (error) =>
+          if error.code == 'auth/account-exists-with-different-credential'
+            email = error.email
+            cred = error.credential
+            firebase.auth().fetchProvidersForEmail(email).then (providerIds) =>
+              @signInAndLink( providerIds[0], cred )
+              
         firebase.auth().onAuthStateChanged (user) =>
           if user
             @watchGames()
@@ -106,24 +116,34 @@ $ ->
 
       # Sign in a user with Github
       githubSignIn: (event) ->
-        @isSigningIn = 'github'
+        @isSigningIn = 'github.com'
         provider = new firebase.auth.GithubAuthProvider()
-        console.log provider
-        firebase.auth().signInWithRedirect( provider )
+        @signInWithProvider( provider )
 
-      # Sign in a user with Github
+      # Sign in a user with Google
       googleSignIn: (event) ->
-        @isSigningIn = 'google'
+        @isSigningIn = 'google.com'
         provider = new firebase.auth.GoogleAuthProvider()
-        console.log provider
-        firebase.auth().signInWithRedirect( provider )
+        @signInWithProvider( provider )
 
-      # Sign in a user with Github
+      # Sign in a user with Facebook
       facebookSignIn: (event) ->
-        @isSigningIn = 'facebook'
+        @isSigningIn = 'facebook.com'
         provider = new firebase.auth.FacebookAuthProvider()
-        console.log provider
+        @signInWithProvider( provider )
+        
+      signInWithProvider: (provider) ->
+        console.log "Attempting to sign in with #{provider.providerId}"
         firebase.auth().signInWithRedirect( provider )
+        
+      signInAndLink: (providerId, cred) ->
+        console.table cred
+        # switch providerId
+        #   when 'github.com' then @githubSignIn()
+        #   when 'facebook.com' then @facebookSignIn()
+        #   when 'google.com' then @googleSignIn()
+        #   else
+        #     console.log "can't login with provderId = #{providerId}"
 
       # Logout a user
       signOut: (event) ->
@@ -243,7 +263,8 @@ $ ->
           
       startCountdown: (seconds) ->
         @countdown = seconds
-        @timer = setInterval =>
+        @countdownTimer = setInterval =>
+          console.log "countdown #{@countdownTimer} -> #{@countdown}"
           @countdown = @countdown - 1
         , 1000
           
