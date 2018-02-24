@@ -1,15 +1,14 @@
 firebaseAdmin   = require 'firebase-admin' 
-serviceAccount  = require './firebase.json' 
+serviceAccount  = require './firebase.json'
+grAccount       = require './greenriver.json'
 moviedb         = require './moviedb'
 underscore      = require 'underscore'
-moment          = require 'moment'
-timer           = require 'moment-timer'
 
 class Firestore
   
   constructor: () ->
     firebaseAdmin.initializeApp
-      credential: firebaseAdmin.credential.cert(serviceAccount)
+      credential: firebaseAdmin.credential.cert(grAccount)
     @database = firebaseAdmin.firestore()
     
   watchGames: ->

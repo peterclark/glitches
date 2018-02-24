@@ -55,11 +55,15 @@ $ ->
       isSigningIn: (yesOrNo) ->
         localStorage.setItem( 'isSigningIn', yesOrNo )
       countdown: ->
-        if @countdown < 0
+        if @countdown > 0
+          console.log "counting down - #{@countdown}"
+        else
+          console.log 'clearing countdown timer'
           clearInterval(@countdownTimer)
           @playGame()
       hintNumber: ->
         if @hintNumber > 3
+          console.log 'clearing hint and score timers'
           clearInterval(@hintTimer)
           clearInterval(@scoreTimer)
           @hintScore = 0
@@ -67,16 +71,22 @@ $ ->
     methods:
       # Initialize Firebase Database
       initFirebase: ->
-        firebase.initializeApp( @firebaseConfig() )
+        firebase.initializeApp( @grFirebaseConfig() )
 
       firestore: ->
         firebase.firestore()
 
-      firebaseConfig: ->
+      myFirebaseConfig: ->
         apiKey: "AIzaSyBiL1Ikw4zCZ-0T3YxmuWPXKZDxAu4UuRo"
         authDomain: "trivia-17e61.firebaseapp.com"
         databaseURL: "https://trivia-17e61.firebaseio.com"
         projectId: "trivia-17e61"
+
+      grFirebaseConfig: ->
+        apiKey: "AIzaSyAMzN83nuL4FC8ThBy9Jyg8CqebMA4FSMk"
+        authDomain: "peter-cd63b.firebaseapp.com"
+        databaseURL: "https://peter-cd63b.firebaseio.com"
+        projectId: "peter-cd63b"
 
       # Watch for firebase authentication
       watchAuth: ->
@@ -226,12 +236,13 @@ $ ->
         console.log "watching game #{gameId}"
         @ignoreGames()
         @firestore().collection('games').doc(gameId).onSnapshot (doc) =>
-          console.log "Game #{gameId} changed"
+          console.log "Game #{gameId} changed - #{doc.data()}"
           if doc.exists
             data = doc.data()
             data.id = doc.id
             @game = data
             if @game.status == 'starting'
+              console.log 'starting countdown'
               @startCountdown(5)
             @players.forEach (player) =>
               @game.scores = {} unless @game.scores?
@@ -264,7 +275,6 @@ $ ->
       startCountdown: (seconds) ->
         @countdown = seconds
         @countdownTimer = setInterval =>
-          console.log "countdown #{@countdownTimer} -> #{@countdown}"
           @countdown = @countdown - 1
         , 1000
           
