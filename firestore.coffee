@@ -2,13 +2,13 @@ firebaseAdmin   = require 'firebase-admin'
 serviceAccount  = require './firebase.json'
 grAccount       = require './greenriver.json'
 moviedb         = require './moviedb'
-underscore      = require 'underscore'
+_               = require 'underscore'
 
 class Firestore
   
   constructor: () ->
     firebaseAdmin.initializeApp
-      credential: firebaseAdmin.credential.cert(grAccount)
+      credential: firebaseAdmin.credential.cert(serviceAccount)
     @database = firebaseAdmin.firestore()
     
   watchGames: ->
@@ -24,7 +24,7 @@ class Firestore
   addTriviaToGame: (game) ->
     moviedb.getMovies(game.data().genreId).then (movies) =>
       answer = movies[0]
-      movies = underscore.shuffle movies[0..3]
+      movies = _.shuffle movies[0..3]
       console.log 'adding trivia'
       @database.collection('trivia').doc(game.id).set
         hints: [
@@ -47,12 +47,47 @@ class Firestore
   registerScoreForUser: (uid, score, gameId) ->
     console.log 'registering score'
     @database.collection('games').doc(gameId).update
-      "scores.#{uid}": score
+      "scores.#{uid}": { uid: uid, score: score }
       
   endGame: (gameId) ->
     setTimeout =>
-      @database.collection('games').doc(gameId).update( status: 'over' )
+      game = @database.collection('games').doc(gameId)
+      game.update( status: 'over' )
       console.log "Ending game #{gameId}"
+      @updateStats(game)
     , 24000
+    
+  updateStats:  (game) ->
+    game.get().then (doc) =>
+      if doc.exists
+        winner = @winner(doc.data())
+        @updateWinner(winner)
+    .catch (error) ->
+      console.log error
+      
+  winner: (game) ->
+    _.max game.scores, (player) -> player.score
+    
+  updateWinner: (winner) ->
+    console.log winner
+    player = @database.collection('users').doc(winner.uid)
+    player.get().then (doc) ->
+      user = doc.data()
+      highScore   = user.highScore || 0
+      gamesPlayed = user.gamesPlayed || 0
+      gamesWon    = user.gamesWon || 0
+      
+      highScore = 
+        if winner.score > highScore 
+        then winner.score 
+        else highScore
+          
+      player.update 
+        gamesPlayed: gamesPlayed + 1
+        gamesWon: gamesWon + 1
+        highScore: highScore
+      
+      
+      
 
 module.exports = new Firestore

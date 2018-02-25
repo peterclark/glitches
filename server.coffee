@@ -56,6 +56,9 @@ app.get '/', (req, res) ->
   
 app.get '/about', (req, res) ->
   res.render 'about.pug'
+  
+app.get '/profile', (req, res) ->
+  res.render 'profile.pug'
 
 app.get '/genres', (req, res) ->
   res.json app.get('genres')

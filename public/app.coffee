@@ -20,7 +20,6 @@ $ ->
       user: null
       game: null
       players: []
-      countdown: 5
       isSigningIn: localStorage.getItem('isSigningIn')
 
     created: ->
@@ -51,16 +50,10 @@ $ ->
       gameOver: ->
         @game and @game.status == 'over'
         
+        
     watch:
       isSigningIn: (yesOrNo) ->
         localStorage.setItem( 'isSigningIn', yesOrNo )
-      countdown: ->
-        if @countdown > 0
-          console.log "counting down - #{@countdown}"
-        else
-          console.log 'clearing countdown timer'
-          clearInterval(@countdownTimer)
-          @playGame()
       hintNumber: ->
         if @hintNumber > 3
           console.log 'clearing hint and score timers'
@@ -71,7 +64,7 @@ $ ->
     methods:
       # Initialize Firebase Database
       initFirebase: ->
-        firebase.initializeApp( @grFirebaseConfig() )
+        firebase.initializeApp( @myFirebaseConfig() )
 
       firestore: ->
         firebase.firestore()
@@ -236,17 +229,20 @@ $ ->
         console.log "watching game #{gameId}"
         @ignoreGames()
         @firestore().collection('games').doc(gameId).onSnapshot (doc) =>
-          console.log "Game #{gameId} changed - #{doc.data()}"
+          console.log "Game #{gameId} changed"
           if doc.exists
             data = doc.data()
             data.id = doc.id
             @game = data
-            if @game.status == 'starting'
-              console.log 'starting countdown'
-              @startCountdown(5)
             @players.forEach (player) =>
               @game.scores = {} unless @game.scores?
-              player.answered = @game.scores[player.uid]
+              if @game.scores[player.uid]
+                score = @game.scores[player.uid].score
+                console.log "score is #{score}"
+                player.answered = score
+            if @gameOver
+              console.log 'clearing choices'
+              @choices = []
           else
             @firestore().collection('users').doc(@user.uid).update
               gameId: null
@@ -255,9 +251,10 @@ $ ->
           
         # Watch players in this Game
         @firestore().collection('users').where("gameId", "==", gameId).onSnapshot (docs) =>
+          return if @gameOver # so we don't overwrite their scores
           @players.length = 0
-          console.log 'players changed'
           docs.forEach (doc) =>
+            console.log "player #{doc.data().displayName} updated"
             @players.push doc.data()
         , (error) ->
           console.log 'stopped listening to players'
@@ -272,22 +269,6 @@ $ ->
         .catch (error) =>
           console.log error
           
-      startCountdown: (seconds) ->
-        @countdown = seconds
-        @countdownTimer = setInterval =>
-          @countdown = @countdown - 1
-        , 1000
-          
-      # start a game
-      startGame: (event) ->
-        return unless @gameHost?
-        @firestore().collection('games').doc( @game.id ).update
-          status: 'starting'
-        .then =>
-          console.log "game #{@game.id} set to starting"
-        .catch (error) =>
-          console.log 'error setting game status to starting'
-          
       # play the game
       playGame: ->
         @showChoices = true
@@ -299,10 +280,6 @@ $ ->
         .catch (error) =>
           console.log 'error setting game status to playing'
           console.log error
-          
-      # end the game locally for the user
-      endGame: ->
-        @game.status = 'over'
           
       watchTrivia: (gameId) ->
         @firestore().collection('trivia').doc( gameId ).onSnapshot (doc) =>
@@ -349,14 +326,4 @@ $ ->
           console.log res
         .catch (error) ->
           console.log error
-            
-        
-        # sort players by score left to right
-        # show movie poster for answer
-        # store totalScore for players
-        # store # of wins
-        # store # games played for all
-        # create /profile page
-        #  -> show games played
-        #  -> show total wins
         

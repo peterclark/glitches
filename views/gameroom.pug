@@ -21,14 +21,10 @@ main.gameroom(v-if="playing")
         small.text-success {{ player.answered }}
   
   .gameboard
-    .btn.btn-success.btn-lg.start.game(v-if='gameHost && gameOpen' v-on:click='startGame')
+    .btn.btn-success.btn-lg.start.game(v-if='gameHost && gameOpen' v-on:click='playGame')
       | Start Game
     .waiting(v-else-if='gameOpen')
       .text-muted waiting for host to start game...
-    .started(v-else-if='gameStarting')
-      div(v-for='number in [5,4,3,2,1]')
-        transition(name='bounce' v-if='countdown == number' appear)
-          .countdown.text-muted {{ countdown }}
     .playing(v-else-if='gamePlaying')
       .trivia-box
         .hints

@@ -1,0 +1,6 @@
+nav.navigation
+  a.btn.btn-link(href='/profile')
+    img.rounded(v-bind:src="user.photoURL")
+  a.btn.btn-link(href='/') Movie Trivia
+  button.btn.btn-link.signout-btn(v-on:click='signOut')
+    i.fa.fa-fw.fa-sign-out
