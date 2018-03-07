@@ -236,8 +236,8 @@ $ ->
             @game = data
             @players.forEach (player) =>
               @game.scores = {} unless @game.scores?
-              if @game.scores[player.uid]
-                score = @game.scores[player.uid].score
+              if @game.scores[player.uid]?
+                score = @game.scores[player.uid]
                 console.log "score is #{score}"
                 player.answered = score
             if @gameOver

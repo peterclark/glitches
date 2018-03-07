@@ -18,7 +18,7 @@ class Firestore
           console.log 'game is now playing'
           @addTriviaToGame(change.doc)
         else if change.type == 'removed'
-          console.log 'game is now removed'
+          console.log 'game is not playing'
           @removeTriviaForGame( change.doc )
           
   addTriviaToGame: (game) ->
@@ -47,47 +47,49 @@ class Firestore
   registerScoreForUser: (uid, score, gameId) ->
     console.log 'registering score'
     @database.collection('games').doc(gameId).update
-      "scores.#{uid}": { uid: uid, score: score }
+      "scores.#{uid}": score
       
   endGame: (gameId) ->
     setTimeout =>
       game = @database.collection('games').doc(gameId)
       game.update( status: 'over' )
-      console.log "Ending game #{gameId}"
       @updateStats(game)
     , 24000
     
   updateStats:  (game) ->
     game.get().then (doc) =>
       if doc.exists
-        winner = @winner(doc.data())
-        @updateWinner(winner)
+        scores = doc.data().scores
+        winner = @winner(scores)
+        console.log "winner is #{winner}"
+        @updatePlayer( uid, score, winner ) for uid, score of scores
+      else
+        console.log 'game does not exist'
     .catch (error) ->
       console.log error
       
-  winner: (game) ->
-    _.max game.scores, (player) -> player.score
+  winner: (scores) ->
+    _.max Object.keys(scores), (score) -> scores[score]
     
-  updateWinner: (winner) ->
-    console.log winner
-    player = @database.collection('users').doc(winner.uid)
-    player.get().then (doc) ->
-      user = doc.data()
-      highScore   = user.highScore || 0
-      gamesPlayed = user.gamesPlayed || 0
-      gamesWon    = user.gamesWon || 0
+  updatePlayer: (uid, score, winner) ->
+    console.log "updating #{uid} with #{score}"
+    user = @database.collection('users').doc(uid)
+    user.get().then (doc) ->
+      data = doc.data()
+      console.log "updating stats for #{data.displayName}"
+      highScore   = data.highScore || 0
+      gamesPlayed = data.gamesPlayed || 0
+      gamesWon    = data.gamesWon || 0
       
-      highScore = 
-        if winner.score > highScore 
-        then winner.score 
-        else highScore
+      highScore = if score > highScore then score else highScore
+         
+      if uid == winner
+        gamesWon = gamesWon + 1
           
-      player.update 
+      user.update 
         gamesPlayed: gamesPlayed + 1
-        gamesWon: gamesWon + 1
+        gamesWon: gamesWon
         highScore: highScore
       
       
-      
-
 module.exports = new Firestore
