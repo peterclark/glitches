@@ -14,7 +14,6 @@ $ ->
       scores: null
       choices: []
       showChoices: true
-      answer: null
       genres: []
       games: []
       user: null
@@ -206,6 +205,7 @@ $ ->
           genre: genre
           genreId: button.data('genre-id')
           status: 'open'
+          createdAt: new Date()
         .then (game) =>
           @firestore().collection('users').doc(@user.uid).update
             gameId: game.id
@@ -274,6 +274,7 @@ $ ->
         @showChoices = true
         @firestore().collection('games').doc( @game.id ).update
           status: 'playing'
+          startedAt: new Date()
         .then =>
           @watchTrivia( @game.id )
           console.log "game #{@game.id} set to playing"
@@ -294,8 +295,6 @@ $ ->
             choices = doc.data().choices
             choices.forEach (choice) =>
               @choices.push choice
-              
-            @answer = doc.data().answer
             
             @showHints()
             
@@ -315,13 +314,11 @@ $ ->
         
       selectAnswer: (event) ->
         button = $(event.target)
-        answer = button.text()
-        score = if answer==@answer then @hintScore else 0
         @showChoices = false
         axios.post '/score', 
+          uid: @user.uid
           gameId: @user.gameId
-          uid: @user.uid,
-          score: score
+          answer: button.text()
         .then (res) ->
           console.log res
         .catch (error) ->

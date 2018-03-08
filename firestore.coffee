@@ -44,10 +44,18 @@ class Firestore
     @database.collection('trivia').doc(game.id).delete().then ->
       console.log "deleted trivia for game #{game.id}"
       
-  registerScoreForUser: (uid, score, gameId) ->
-    console.log 'registering score'
-    @database.collection('games').doc(gameId).update
-      "scores.#{uid}": score
+  registerScoreForUser: (uid, gameId, answer) ->
+    now = Math.round new Date() / 100
+    console.log "#{uid} answered - #{answer}"
+    game = @database.collection('games').doc(gameId)
+    correct = ""
+    @database.collection('trivia').doc(gameId).get().then (doc) ->
+      correct = doc.data().answer
+    game.get().then (doc) ->
+      startedAt = Math.round doc.data().startedAt.getTime() / 100
+      score = if answer==correct then 240-(now-startedAt) else 0 
+      game.update
+        "scores.#{uid}": score
       
   endGame: (gameId) ->
     setTimeout =>
@@ -72,6 +80,7 @@ class Firestore
     _.max Object.keys(scores), (score) -> scores[score]
     
   updatePlayer: (uid, score, winner) ->
+    score = if score < 0 then 0 else score
     console.log "updating #{uid} with #{score}"
     user = @database.collection('users').doc(uid)
     user.get().then (doc) ->

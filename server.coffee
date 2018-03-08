@@ -65,10 +65,10 @@ app.get '/genres', (req, res) ->
   
 app.post '/score', (req, res) ->
   uid = req.body.uid
-  score = req.body.score || 0
   gameId = req.body.gameId
+  answer = req.body.answer
   if uid? and gameId?
-    firestore.registerScoreForUser( uid, score, gameId )
+    firestore.registerScoreForUser( uid, gameId, answer )
     res.sendStatus 200
   else
     res.sendStatus 422
