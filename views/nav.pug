@@ -1,6 +1,12 @@
 nav.navigation
-  a.btn.btn-link(href='/profile')
-    img.rounded(v-bind:src="user.photoURL")
-  a.btn.btn-link(href='/') Movie Trivia
-  button.btn.btn-link.signout-btn(v-on:click='signOut')
-    i.fa.fa-fw.fa-sign-out
+  section
+    h1
+      i.fa.fa-fw.fa-film
+  section
+    a.btn.btn-link(v-on:click='toggleProfile')
+      img.rounded(v-bind:src="user.photoURL" v-if='!showProfile')
+      i.fa.fa-fw.fa-home(v-if='showProfile')
+    button.btn.btn-link.stats
+      i.fa.fa-fw.fa-bar-chart
+    button.btn.btn-link.signout-btn(v-on:click='signOut')
+      i.fa.fa-fw.fa-sign-out

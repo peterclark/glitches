@@ -1,34 +1,27 @@
-extends layout.pug
- 
-block body
+main(v-else-if='showProfile')
+  include nav.pug
+  
+  .container
+    .row
+      .col-sm-12
+        h2 Profile
+        hr
+    .row
+      .col-lg-3.col-md-4.col-sm-6
+        .card
+          img.card-img-top.img-fluid(v-bind:src="user.photoURL", alt='Card image cap')
+          .card-body.m-1
+            h5.card-title {{ user.displayName }}
+            p.card-text {{ user.email }}
 
-  #game(v-cloak)
-    main.game
-      include nav.pug
+      .col-lg-3.col-md-4.col-sm-6
+        | Games Played
+        h1 {{ user.gamesPlayed }}
 
-      .container
-        .row
-          .col-sm-12
-            h2 Profile
-            hr
-        .row
-          .col-lg-3.col-md-4.col-sm-6
-            .card
-              img.card-img-top.img-fluid(v-bind:src="user.photoURL", alt='Card image cap')
-              .card-body.m-1
-                h5.card-title {{ user.displayName }}
-                p.card-text {{ user.email }}
-                
-          .col-lg-3.col-md-4.col-sm-6
-            | Games Played
-            h5 {{ user.gamesPlayed }}
-                
-          .col-lg-3.col-md-4.col-sm-6
-            | Games Won
-            h5 {{ user.gamesWon }}
-                
-          .col-lg-3.col-md-4.col-sm-6
-            | High Score
-            h5 {{ user.highScore }}
+      .col-lg-3.col-md-4.col-sm-6
+        | Games Won
+        h1 {{ user.gamesWon }}
 
-  include scripts.pug
+      .col-lg-3.col-md-4.col-sm-6
+        | High Score
+        h1 {{ user.highScore }}

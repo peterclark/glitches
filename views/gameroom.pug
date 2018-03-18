@@ -35,4 +35,4 @@ main.gameroom(v-if="playing")
           .choice.center(v-for="choice in choices")
             button.btn.btn-secondary.btn-lg.btn-block(v-on:click='selectAnswer' v-bind:disabled='!showChoices') {{ choice }}
     .over(v-else-if='gameOver')
-      | Game is Over
+      include results.pug

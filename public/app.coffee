@@ -13,12 +13,12 @@ $ ->
       hints: []
       scores: null
       choices: []
-      showChoices: true
       genres: []
       games: []
       user: null
       game: null
       players: []
+      profile: false
       isSigningIn: localStorage.getItem('isSigningIn')
 
     created: ->
@@ -48,6 +48,10 @@ $ ->
         @game and @game.status == 'playing'
       gameOver: ->
         @game and @game.status == 'over'
+      showProfile: ->
+        @user and @profile
+      showChoices: ->
+        !@game.scores[@user.uid]?
         
         
     watch:
@@ -99,6 +103,9 @@ $ ->
             @getGenres()
           else
             @removeUser()
+            
+      toggleProfile: ->
+        @profile = !@profile
 
       # Watch changes to open firebase games
       watchGames: ->
@@ -187,7 +194,6 @@ $ ->
             @user = doc.data()
           else
             @removeUser()
-          console.table [@user]
         , (error) ->
           console.log "stopped listening to user"
 
@@ -241,8 +247,9 @@ $ ->
                 console.log "score is #{score}"
                 player.answered = score
             if @gameOver
-              console.log 'clearing choices'
+              console.log 'clearing choices and hints'
               @choices = []
+              @hints = []
           else
             @firestore().collection('users').doc(@user.uid).update
               gameId: null
@@ -271,7 +278,6 @@ $ ->
           
       # play the game
       playGame: ->
-        @showChoices = true
         @firestore().collection('games').doc( @game.id ).update
           status: 'playing'
           startedAt: new Date()
@@ -285,7 +291,6 @@ $ ->
       watchTrivia: (gameId) ->
         @firestore().collection('trivia').doc( gameId ).onSnapshot (doc) =>
           if doc.exists
-            
             @hints.length = 0
             hints = doc.data().hints
             hints.forEach (hint) =>
@@ -314,7 +319,6 @@ $ ->
         
       selectAnswer: (event) ->
         button = $(event.target)
-        @showChoices = false
         axios.post '/score', 
           uid: @user.uid
           gameId: @user.gameId

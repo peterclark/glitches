@@ -51,6 +51,7 @@ class Firestore
     correct = ""
     @database.collection('trivia').doc(gameId).get().then (doc) ->
       correct = doc.data().answer
+      console.log "answer is #{correct}"
     game.get().then (doc) ->
       startedAt = Math.round doc.data().startedAt.getTime() / 100
       score = if answer==correct then 240-(now-startedAt) else 0 
