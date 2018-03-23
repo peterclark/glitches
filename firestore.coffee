@@ -52,11 +52,12 @@ class Firestore
     @database.collection('trivia').doc(gameId).get().then (doc) ->
       correct = doc.data().answer
       console.log "answer is #{correct}"
-    game.get().then (doc) ->
-      startedAt = Math.round doc.data().startedAt.getTime() / 100
-      score = if answer==correct then 240-(now-startedAt) else 0 
-      game.update
-        "scores.#{uid}": score
+    .then ->
+      game.get().then (doc) ->
+        startedAt = Math.round doc.data().startedAt.getTime() / 100
+        score = if answer==correct then 240-(now-startedAt) else 0 
+        game.update
+          "scores.#{uid}": score
       
   endGame: (gameId) ->
     setTimeout =>
@@ -68,7 +69,7 @@ class Firestore
   updateStats:  (game) ->
     game.get().then (doc) =>
       if doc.exists
-        scores = doc.data().scores
+        scores = doc.data().scores || {}
         winner = @winner(scores)
         console.log "winner is #{winner}"
         @updatePlayer( uid, score, winner ) for uid, score of scores
